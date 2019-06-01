@@ -13,41 +13,6 @@ var this_parent = {};
 var this_patcher_box = {};
 var me = {};
 
-
-function bang(){
-
-    gen_template.patcher.boxes[0].box.code = "//this is a test comment\n//this is a second test comment";
-
-    println(gen_template.patcher.boxes[0].box.code);
-
-    offset = Math.floor(543/10);
-
-    for(var i = 0; i < 10; i++){
-        var temp  = appendnewOutlet(i+1, i+1, offset*i);
-        gen_template.patcher.boxes.push(temp);
-        println(gen_template.patcher.boxes[i+1].box.id +", " + i);
-        println(gen_template.patcher.boxes[i].box.id +", " + i);
-        temp = {};
-
-        
-    }
-    println(gen_template.patcher.boxes[3].box.id);
-
-
-}
-
-function makefile(){
-
-    access = "readwrite";
-    typelist = "gDSP";
-    var new_string = JSON.stringify(gen_template);
-    outlet(0, new_string);
-    f = new File("decoder.gendsp", access, typelist);
-    f.writestring(new_string);
-    f.close();
-
-}
-
 init();
 
 function read(filename) {
@@ -64,6 +29,7 @@ function read(filename) {
 
     //read file
     f = new File(filename, access, typelist);
+
     if (f.isopen) {
 
         c = f.eof;
@@ -94,8 +60,6 @@ function read(filename) {
         coeffs_valid = coeffs_valid && (decoder.decoder[i].length == ambi_channels);
 
 
-
-
     //post decoder stats / mismatches
 
     if (coeffs_valid && channels_valid) {
@@ -111,13 +75,9 @@ function read(filename) {
         }
 
     }
+
+    postStats();
     createDecoder();
-    outlet(0, "clear");
-    for (var i = 0; i < decoder.coords.length; i++) {
-
-        outlet(0, ["aed", i + 1, decoder.coords[i][0], decoder.coords[i][1], 1]);
-
-    }
 }
 
 function postStats() {
@@ -200,6 +160,12 @@ function setMatrix() {
 
         }
     }
+
+    outlet(0, "clear")
+
+    for(var i = 0; i < decoder.coords.length; i++){
+        outlet(0, ['aed', i + 1, decoder.coords[i][0], decoder.coords[i][1], 1.]);
+    }
 }
 
 function resizeIO() {
@@ -212,13 +178,9 @@ function resizeIO() {
 
         var l = sig_outlets.length - 1;
 
-
-
-        for (var i = 0; i < to_remove; i++) {
-
+        for (var i = 0; i < to_remove; i++) 
             this.patcher.remove(sig_outlets[l - i]);
 
-        }
     }
     //resizing, adding outlets
     if (sig_outlets.length < decoder.spks) {
@@ -458,35 +420,8 @@ function protectio(yn) {
 }
 
 
-function println(txt) {
-    //post('multidec: ' + txt + '\n');
-    outlet(1, txt);
-}
 
-function isEmpty(obj) {
-    for(var key in obj) {
-        if(obj.hasOwnProperty(key))
-            return false;
-    }
-    return true;
-}
 
-function listMethods(object){
-	var list = []
-	list = Object.getOwnPropertyNames(object)
-	    		.filter(function(property) {
-	       			return typeof object[property] == 'function';
-	    		}
-	    		);
-	post()
-	post("# METHODS #")
-	for(var i = 0 ; i < list.length ; i++){
-		post()
-		post(list[i]+"()")
-	}	
-	post()
-	post("# END #")		
-}
 
 
 //append new outlet 
@@ -506,3 +441,37 @@ var gen_template = JSON.parse('{"patcher":{"fileversion":1,"appversion":{"major"
 
 
 //horizontal 543
+
+
+
+//-------helpers
+
+function listMethods(object){
+	var list = []
+	list = Object.getOwnPropertyNames(object)
+	    		.filter(function(property) {
+	       			return typeof object[property] == 'function';
+	    		}
+	    		);
+	post()
+	post("# METHODS #")
+	for(var i = 0 ; i < list.length ; i++){
+		post()
+		post(list[i]+"()")
+	}	
+	post()
+	post("# END #")		
+}
+
+function isEmpty(obj) {
+    for(var key in obj) {
+        if(obj.hasOwnProperty(key))
+            return false;
+    }
+    return true;
+}
+
+function println(txt) {
+    //post('multidec: ' + txt + '\n');
+    outlet(1, txt);
+}
