@@ -95,6 +95,10 @@ function postStats() {
     else {
         println("without max-rE weighting");
     }
+    
+    println("created with: " + decoder.created_with);
+    println("author: " + decoder.author);
+
     println("--------------------------------");
 
 }
